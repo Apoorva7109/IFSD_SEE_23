@@ -1,0 +1,203 @@
+import React, { Component } from 'react';
+
+
+class TripPlanner extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      legs: [],
+      isEditing: false,
+      editIndex: null,
+      editSource: '',
+      editDestination: '',
+      editCost: 0
+    };
+  }
+
+  addLeg() {
+    const newLegSource = this.sourceInput.value;
+    const newLegDestination = this.destinationInput.value;
+    const newLegCost = parseFloat(this.costInput.value);
+
+    if (
+      newLegSource.trim() !== '' &&
+      newLegDestination.trim() !== '' &&
+      !isNaN(newLegCost)
+    ) {
+      const newLeg = {
+        source: newLegSource,
+        destination: newLegDestination,
+        cost: newLegCost
+      };
+
+      this.setState((prevState) => ({
+        legs: [...prevState.legs, newLeg]
+      }));
+
+      this.sourceInput.value = '';
+      this.destinationInput.value = '';
+      this.costInput.value = '';
+    }
+  }
+
+  editLeg(index) {
+    const { source, destination, cost } = this.state.legs[index];
+    this.setState({
+      isEditing: true,
+      editIndex: index,
+      editSource: source,
+      editDestination: destination,
+      editCost: cost
+    });
+  }
+
+  updateLeg() {
+    const { editIndex, editSource, editDestination, editCost } = this.state;
+
+    if (
+      editSource.trim() !== '' &&
+      editDestination.trim() !== '' &&
+      !isNaN(editCost)
+    ) {
+      const updatedLegs = [...this.state.legs];
+      updatedLegs[editIndex] = {
+        source: editSource,
+        destination: editDestination,
+        cost: editCost
+      };
+
+      this.setState({
+        legs: updatedLegs,
+        isEditing: false,
+        editIndex: null,
+        editSource: '',
+        editDestination: '',
+        editCost: 0
+      });
+    }
+  }
+
+  removeLeg(index) {
+    this.setState((prevState) => {
+      const updatedLegs = [...prevState.legs];
+      updatedLegs.splice(index, 1);
+      return { legs: updatedLegs };
+    });
+  }
+
+  handleChange(event) {
+    const { name, value } = event.target;
+    this.setState({ [name]: value });
+  }
+
+  render() {
+    const {
+      legs,
+      isEditing,
+      editSource,
+      editDestination,
+      editCost
+    } = this.state;
+
+    return (
+      <div>
+        <h1>Leg Details:</h1>
+        <table>
+          <thead>
+            <tr>
+              <th>Index</th>
+              <th>Source</th>
+              <th>Destination</th>
+              <th>Cost</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {legs.map((leg, index) => (
+              <tr key={index}>
+                <td>{index}</td>
+                <td>{leg.source}</td>
+                <td>{leg.destination}</td>
+                <td>${leg.cost.toFixed(2)}</td>
+                <td>
+                  <button onClick={() => this.editLeg(index)}>Edit</button>
+                  <button onClick={() => this.removeLeg(index)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div>
+          {isEditing ? (
+            <div>
+              <h2>Edit Leg:</h2>
+              <label>
+                Source:
+                <input
+                  type="text"
+                  name="editSource"
+                  value={editSource}
+                  onChange={(event) => this.handleChange(event)}
+                />
+              </label>
+              <br />
+              <label>
+                Destination:
+                <input
+                  type="text"
+                  name="editDestination"
+                  value={editDestination}
+                  onChange={(event) => this.handleChange(event)}
+                />
+              </label>
+              <br />
+              <label>
+                Cost:
+                <input
+                  type="number"
+                  name="editCost"
+                  value={editCost}
+                  onChange={(event) => this.handleChange(event)}
+                />
+              </label>
+              <br />
+              <button onClick={() => this.updateLeg()}>Update</button>
+            </div>
+          ) : (
+            <div>
+              <h2>Add New Leg:</h2>
+              <label>
+                Source:
+                <input
+                  type="text"
+                  ref={(input) => (this.sourceInput = input)}
+                />
+              </label>
+              <br />
+              <label>
+                Destination:
+                <input
+                  type="text"
+                  ref={(input) => (this.destinationInput = input)}
+                />
+              </label>
+              <br />
+              <label>
+                Cost:
+                <input
+                  type="number"
+                  ref={(input) => (this.costInput = input)}
+                />
+              </label>
+              <br />
+              <button onClick={() => this.addLeg()}>Add Leg</button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+}
+
+export default TripPlanner
